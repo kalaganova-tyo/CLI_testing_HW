@@ -6,20 +6,28 @@ import os
 
 def create(file_name, text: str):
     """Create new txt file"""
-    with open(file_name, 'w') as file:
+    full_path = os.path.abspath(file_name)
+    with open(full_path, 'w') as file:
         file.write(text)
+    print(f'Файл {full_path} создан')
+
 
 def makedir(dir_name):
     """Create new directory"""
     os.mkdir(dir_name)
 
+
 def changedir(dir_name):
     """Change directory"""
+    if not os.path.isdir(dir_name):
+        print(f'ОшибкаОшибка: {dir_name} не найдена')
+        return
     try:
         os.chdir(dir_name)
-        print(f'Переместились в папку {dir_name}')
-    except NotADirectoryError:
-        print(f'Ошибка: {dir_name} не найдена')
+        print(f'Переместились в папку {os.getcwd()}')
+    except Exception as e:
+        print('Ошибка при смене директории')
+
 
 def copy(file_name, new_file_name):
     """Copy file"""
@@ -54,11 +62,24 @@ def file_counter(directory='.'):
         print(f'Папка {directory} не найдена')
 
 
+def analyse(directory='.'):
+    if not os.path.isdir(directory):
+        print(f'Ошибка: {directory} такой папки не существует')
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            path_to_file = os.path.join(root, file)
+            try:
+                file_size = os.path.getsize(path_to_file)
+                print(f'Файл {file} имеет размер {file_size} байт')
+            except OSError:
+                print(f'Файл {file} поломан')
+
+
 parser = argparse.ArgumentParser('Simple file manager')
 
 subparsers = parser.add_subparsers(dest='command', required=True)
 
-parser_add = subparsers.add_parser(name='create', help='Create some text file')
+parser_add = subparsers.add_parser(name='create', help='Create some text file. You can make file in other directory <dir>/<file_name>')
 parser_add.add_argument('file_name', type=str, help='Name for new file')
 parser_add.add_argument('text', type=str, help='Text in file')
 parser_add.set_defaults(func=create)
@@ -83,6 +104,10 @@ parser_sub.set_defaults(func=delete)
 parser_sub = subparsers.add_parser(name='file_counter', help='Count all files in this directory and subdirectory')
 parser_sub.set_defaults(func=file_counter)
 
+parser_sub = subparsers.add_parser(name='analyse', help='All files size in this directory and subdirectory')
+parser_sub.add_argument('directory', type=str, nargs='?', default='.', help='Directory for analyse, default = current')
+parser_sub.set_defaults(func=analyse)
+
 argv = parser.parse_args()
 
 if argv.command == 'create':
@@ -97,3 +122,5 @@ elif argv.command == 'delete':
     argv.func(argv.file_or_dir)
 elif argv.command == 'file_counter':
     argv.func()
+elif argv.command == 'analyse':
+    argv.func(argv.directory)
