@@ -1,4 +1,3 @@
-#import sys
 import argparse
 import shutil
 import os
@@ -60,26 +59,35 @@ def file_counter(directory='.'):
         print(f'Всего файлов в папке {all_files}')
     except OSError:
         print(f'Папка {directory} не найдена')
+    return all_files
 
 
 def analyse(directory='.'):
+    """Sizes all files in directory"""
     if not os.path.isdir(directory):
         print(f'Ошибка: {directory} такой папки не существует')
+    all_size = 0
+    result = []
     for root, dirs, files in os.walk(directory):
         for file in files:
             path_to_file = os.path.join(root, file)
             try:
                 file_size = os.path.getsize(path_to_file)
-                print(f'Файл {file} имеет размер {file_size} байт')
+                all_size += file_size
+                result.append(f'Файл {file} имеет размер {file_size} байт')
             except OSError:
-                print(f'Файл {file} поломан')
+                result.append(f'Файл {file} поломан')
+    result.append(f'Всего {all_size} байт')
+    print(*result, sep='\n')
+    return result
 
 
 parser = argparse.ArgumentParser('Simple file manager')
 
 subparsers = parser.add_subparsers(dest='command', required=True)
 
-parser_add = subparsers.add_parser(name='create', help='Create some text file. You can make file in other directory <dir>/<file_name>')
+parser_add = subparsers.add_parser(name='create',
+                                   help='Create some text file. You can make file in other directory <dir>/<file_name>')
 parser_add.add_argument('file_name', type=str, help='Name for new file')
 parser_add.add_argument('text', type=str, help='Text in file')
 parser_add.set_defaults(func=create)
@@ -108,19 +116,20 @@ parser_sub = subparsers.add_parser(name='analyse', help='All files size in this 
 parser_sub.add_argument('directory', type=str, nargs='?', default='.', help='Directory for analyse, default = current')
 parser_sub.set_defaults(func=analyse)
 
-argv = parser.parse_args()
+if __name__ == '__main__':
+    argv = parser.parse_args()
 
-if argv.command == 'create':
-    argv.func(argv.file_name, argv.text)
-elif argv.command == 'makedir':
-    argv.func(argv.dir_name)
-elif argv.command == 'changedir':
-    argv.func(argv.dir_name)
-elif argv.command == 'copy':
-    argv.func(argv.file_name, argv.new_file_name)
-elif argv.command == 'delete':
-    argv.func(argv.file_or_dir)
-elif argv.command == 'file_counter':
-    argv.func()
-elif argv.command == 'analyse':
-    argv.func(argv.directory)
+    if argv.command == 'create':
+        argv.func(argv.file_name, argv.text)
+    elif argv.command == 'makedir':
+        argv.func(argv.dir_name)
+    elif argv.command == 'changedir':
+        argv.func(argv.dir_name)
+    elif argv.command == 'copy':
+        argv.func(argv.file_name, argv.new_file_name)
+    elif argv.command == 'delete':
+        argv.func(argv.file_or_dir)
+    elif argv.command == 'file_counter':
+        argv.func()
+    elif argv.command == 'analyse':
+        argv.func(argv.directory)
