@@ -18,7 +18,7 @@
 Вызов в консоли:
 
     .\manager
-            create <test.txt>
+            create <name.txt> <text>
             makedir <testfolder>
             changedir <folder_name_for_change>
             copy <file_name> <new_name>
@@ -26,3 +26,13 @@
             file_counter <folder_name>
             analyse <folder_name>
 
+
+#### Возможности файлового менеджера через интерфейс
+
+- Создание файла с текстом;
+- Создание папки;
+- Смена папки;
+- Копирование файла;
+- Удаление файла или папки;
+- Подсчет файлов в текущей папке;
+- Анализ папки - размер всех файлов в папке.
